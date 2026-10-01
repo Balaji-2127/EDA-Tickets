@@ -2,6 +2,8 @@
 
 Run:  streamlit run app.py
 """
+import io
+
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -111,12 +113,37 @@ def mix_chart(t, by, top=None, height=None):
 
 # ---------------------------------------------------------------- data
 @st.cache_data
-def get_data():
-    df = dp.load()
-    return df, dp.ticket_timings(df)
+def get_data(source: bytes):
+    df = dp.load(io.BytesIO(source))
+    return df, dp.ticket_timings(df), pd.read_excel(io.BytesIO(source))
 
 
-df_all, timings_all = get_data()
+# A local data/ticket_dump.xlsx is used when present. Otherwise (e.g. the hosted
+# version, where company data is not published) the viewer uploads the file; it
+# is read in their own browser session and never stored anywhere.
+if "data_bytes" not in st.session_state and dp.DATA_PATH.exists():
+    st.session_state.data_bytes = dp.DATA_PATH.read_bytes()
+
+if "data_bytes" not in st.session_state:
+    st.markdown("<div class='hero'><h1>Screen Ticket Insights</h1>"
+                "<p>Why our screens fail and how tickets are handled</p></div>", unsafe_allow_html=True)
+    st.write("")
+    finding("Upload the ticket export to begin",
+            "Use the <b>ticket_dump.xlsx</b> export (same columns as the original). The file is processed "
+            "inside your browser only: it is not uploaded to or saved on any server.")
+    upload = st.file_uploader("Ticket export (.xlsx)", type=["xlsx"])
+    if upload is None:
+        st.stop()
+    st.session_state.data_bytes = upload.getvalue()
+    st.rerun()
+
+try:
+    df_all, timings_all, raw = get_data(st.session_state.data_bytes)
+except Exception as e:  # wrong file / missing columns
+    del st.session_state["data_bytes"]
+    st.error(f"Could not read this file. Is it the ticket export with the original columns? ({e})")
+    st.button("Try another file")
+    st.stop()
 
 # ---------------------------------------------------------------- sidebar filters
 with st.sidebar:
@@ -134,6 +161,9 @@ with st.sidebar:
     causes = st.multiselect("Cause", dp.CAUSE_ORDER, placeholder="All causes")
     sites = st.multiselect("Site", sorted(df_all["media_site_name"].unique()), placeholder="All sites")
     st.divider()
+    if not dp.DATA_PATH.exists() and st.button("Load a different file", width="stretch"):
+        del st.session_state["data_bytes"]
+        st.rerun()
     st.caption("**How to read this:** a *ticket* = one OPEN event. One ticket usually has several "
                "rows in the raw file (opened → worked on → monitored → closed).")
 
@@ -470,7 +500,6 @@ with tab_ops:
 # ================================================================= DATA QUALITY & RAW
 with tab_data:
     header("Data health check", "How complete and useful each original column is.")
-    raw = pd.read_excel(dp.DATA_PATH)
     notes = {
         "screen_and_component_name": "Empty: dropped",
         "audit_issue_code": "70% say NOT_DETERMINED: use component_issue_code instead",

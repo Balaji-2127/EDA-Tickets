@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Screen Ticket Insights</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@stlite/browser@1.9.2/build/stlite.css" />
+  <style>body { margin: 0; background: #f9f9f7; }</style>
+</head>
+<body>
+  <!-- The Streamlit app (app.py) runs fully inside the browser via stlite (Pyodide).
+       Static hosting such as Vercel only serves these files; no Python server is needed. -->
+  <div id="root"></div>
+  <script type="module">
+    import { mount } from "https://cdn.jsdelivr.net/npm/@stlite/browser@1.9.2/build/stlite.js";
+    mount(
+      {
+        requirements: ["plotly", "openpyxl"],
+        entrypoint: "app.py",
+        files: {
+          "app.py": { url: "./app.py" },
+          "data_prep.py": { url: "./data_prep.py" },
+        },
+        // mirrors .streamlit/config.toml
+        streamlitConfig: {
+          "theme.base": "light",
+          "theme.primaryColor": "#2a78d6",
+          "theme.backgroundColor": "#f9f9f7",
+          "theme.secondaryBackgroundColor": "#ffffff",
+          "theme.textColor": "#0b0b0b",
+          "theme.font": "sans serif",
+          "client.toolbarMode": "minimal",
+        },
+      },
+      document.getElementById("root"),
+    );
+  </script>
+</body>
+</html>
