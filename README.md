@@ -5,6 +5,9 @@ A Streamlit dashboard that explores Adonmo's screen-failure tickets. It covers t
 
 ## Run it
 
+The ticket data is company-internal and is **not in this repo**. Put the export at
+`data/ticket_dump.xlsx` before running.
+
 ```
 pip install -r requirements.txt
 streamlit run app.py
