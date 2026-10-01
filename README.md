@@ -5,8 +5,7 @@ A Streamlit dashboard that explores Adonmo's screen-failure tickets. It covers t
 
 ## Run it
 
-The ticket data is company-internal and is **not in this repo**. Put the export at
-`data/ticket_dump.xlsx` before running.
+The ticket data is included at `data/ticket_dump.xlsx`. Replace it with a new export to refresh.
 
 ```
 pip install -r requirements.txt
@@ -21,8 +20,7 @@ Vercel cannot run a Python server, so `index.html` runs the same `app.py` **insi
 browser** using [stlite](https://github.com/whitphx/stlite) (Streamlit on WebAssembly).
 `vercel.json` tells Vercel to serve the files as a static site. Pushing to `main` redeploys.
 
-The hosted page has no data built in. The viewer uploads `ticket_dump.xlsx`, and the
-file is processed in their browser only. The first load takes about 20–40 seconds
+The hosted page loads `data/ticket_dump.xlsx` automatically. The first load takes about 20–40 seconds
 while Python downloads into the browser.
 
 ## Files

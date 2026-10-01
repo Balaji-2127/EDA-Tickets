@@ -2,6 +2,3 @@ __pycache__/
 *.pyc
 .venv/
 
-# Company data - keep private, never push
-data/*.xlsx
-data/*.csv

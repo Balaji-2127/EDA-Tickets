@@ -2,6 +2,7 @@
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
     { "src": "app.py", "use": "@vercel/static" },
-    { "src": "data_prep.py", "use": "@vercel/static" }
+    { "src": "data_prep.py", "use": "@vercel/static" },
+    { "src": "data/ticket_dump.xlsx", "use": "@vercel/static" }
   ]
 }
